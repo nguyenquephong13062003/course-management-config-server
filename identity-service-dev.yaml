@@ -20,7 +20,7 @@ spring:
 
 jwt:
   secret-key: W6uEhUvaX7MtLaUrVsJHTIQNAcaOvRa3zNpGcxIdjGAGIAJU9TotBMdrUFjNCGAE
-  expired: 3600000 # 1 hour in milliseconds
+  expired: 900000 # 15 minutes in milliseconds
 
 server:
   port: 8081
