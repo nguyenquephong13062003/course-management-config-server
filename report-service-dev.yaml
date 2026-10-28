@@ -1,0 +1,28 @@
+spring:
+  application:
+    name: report-service
+
+server:
+  port: 8085
+
+eureka:
+  client:
+    register-with-eureka: true
+    fetch-registry: true
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+  instance:
+    prefer-ip-address: true
+    instance-id: ${spring.application.name}
+
+# report-service has no database: every report is aggregated from synchronous calls.
+report:
+  identity-service:
+    base-url: http://identity-service
+  course-service:
+    base-url: http://course-service
+  learning-service:
+    base-url: http://learning-service
+  security:
+    # X-Auth-UserId / X-Auth-Roles are trusted only when injected by the API Gateway.
+    gateway-headers-enabled: true

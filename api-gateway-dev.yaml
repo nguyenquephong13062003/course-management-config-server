@@ -1,0 +1,49 @@
+spring:
+  application:
+    name: api-gateway
+  main:
+    web-application-type: reactive
+  cloud:
+    gateway:
+      server:
+        webflux:
+          routes:
+            - id: identity-service
+              uri: lb://identity-service
+              predicates:
+                - Path=/api/v1/auth/**,/api/v1/users/**
+            # Must stay BEFORE course-service: /api/v1/courses/*/reviews belongs to learning-service.
+            - id: learning-service
+              uri: lb://learning-service
+              predicates:
+                - Path=/api/v1/courses/*/reviews,/api/v1/reviews/**,/api/v1/enrollments/**
+            - id: notification-service
+              uri: lb://notification-service
+              predicates:
+                - Path=/api/v1/notifications/**
+            - id: report-service
+              uri: lb://report-service
+              predicates:
+                - Path=/api/v1/reports/**
+            - id: course-service
+              uri: lb://course-service
+              predicates:
+                - Path=/api/v1/courses/**,/api/v1/lessons/**
+
+server:
+  port: 8080
+
+# Set JWT_SECRET_KEY to the same Base64-encoded signing secret used by Identity Service.
+# Do not commit production secrets to source control. Rotate the previously committed key.
+jwt:
+  secret-key: W6uEhUvaX7MtLaUrVsJHTIQNAcaOvRa3zNpGcxIdjGAGIAJU9TotBMdrUFjNCGAE
+
+eureka:
+  client:
+    register-with-eureka: true
+    fetch-registry: true
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+  instance:
+    prefer-ip-address: true
+    instance-id: ${spring.application.name}

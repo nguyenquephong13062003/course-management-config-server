@@ -1,0 +1,52 @@
+spring:
+  application:
+    name: notification-service
+  datasource:
+    url: jdbc:postgresql://localhost:5432/notification_db_v2
+    username: ${DB_USERNAME:postgres}
+    password: ${DB_PASSWORD:12345678}
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        format_sql: true
+  kafka:
+    bootstrap-servers: localhost:9092
+    consumer:
+      group-id: notify-group
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      # Payloads are read as raw JSON and parsed by eventType (producers send no type headers).
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+
+server:
+  port: 8084
+
+eureka:
+  client:
+    register-with-eureka: true
+    fetch-registry: true
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+  instance:
+    prefer-ip-address: true
+    instance-id: ${spring.application.name}
+
+notification:
+  identity-service:
+    base-url: http://identity-service
+  learning-service:
+    base-url: http://learning-service
+  # Kafka-driven calls have no user request, so they authenticate with a fixed ADMIN identity.
+  # Use the id of a real ADMIN account. Services trust these headers only from inside the cluster.
+  system:
+    user-id: ${SYSTEM_USER_ID:1}
+  kafka:
+    course-topic: course-events
+    enrollment-topic: enrollment-events
+  security:
+    # X-Auth-UserId / X-Auth-Roles are trusted only when injected by the API Gateway.
+    gateway-headers-enabled: true
